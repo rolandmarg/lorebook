@@ -145,6 +145,51 @@ describe('inject_files resolution', () => {
     expect(entries[0]!.content).toBe('File A.\n\nFile B.');
     rmSync(cwd, { recursive: true, force: true });
   });
+
+  test('warns on stderr for missing file', () => {
+    const cwd = setupProject(
+      { 'design.md': '---\nkeys: [design]\ninject_files: [MISSING.md]\n---\nPreamble.' },
+    );
+    const stderrChunks: string[] = [];
+    const origWrite = process.stderr.write;
+    process.stderr.write = (chunk: any) => { stderrChunks.push(String(chunk)); return true; };
+    try {
+      const entries = resolveEntries(cwd, cwd);
+      expect(entries[0]!.content).toBe('Preamble.');
+      expect(stderrChunks.some(c => c.includes('MISSING.md'))).toBe(true);
+    } finally {
+      process.stderr.write = origWrite;
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  test('empty body and all files missing yields empty content', () => {
+    const cwd = setupProject(
+      { 'design.md': '---\nkeys: [design]\ninject_files: [MISSING.md]\n---' },
+    );
+    const origWrite = process.stderr.write;
+    process.stderr.write = () => true;
+    try {
+      const entries = resolveEntries(cwd, cwd);
+      expect(entries[0]!.content).toBe('');
+    } finally {
+      process.stderr.write = origWrite;
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  test('global entry resolves inject_files against cwd', () => {
+    const projectDir = mkdtempSync(join(tmpdir(), 'lorebook-test-'));
+    const globalDir = mkdtempSync(join(tmpdir(), 'lorebook-test-'));
+    const gLorebook = join(globalDir, '.claude', 'lorebook');
+    mkdirSync(gLorebook, { recursive: true });
+    writeFileSync(join(gLorebook, 'design.md'), '---\nkeys: [design]\ninject_files: [PHILOSOPHY.md]\n---');
+    writeFileSync(join(projectDir, 'PHILOSOPHY.md'), 'Project philosophy.');
+    const entries = resolveEntries(projectDir, globalDir);
+    expect(entries[0]!.content).toBe('Project philosophy.');
+    rmSync(projectDir, { recursive: true, force: true });
+    rmSync(globalDir, { recursive: true, force: true });
+  });
 });
 
 import { loadConfig } from '../src/resolve';
