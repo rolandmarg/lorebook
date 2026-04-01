@@ -18,10 +18,10 @@ Markdown files with YAML frontmatter in `.claude/lorebook/` (project) or `~/.cla
 
 ```markdown
 ---
-keys: [lorebook]
-priority: 0
-enabled: true
-description: Self-referential entry — explains lorebook to the agent when the user mentions it
+keys: [lorebook]                # trigger words — match if ANY appears in prompt
+priority: 0                     # higher = injected first, wins cap ties
+enabled: true                   # false to disable without deleting
+description: Explains lorebook  # for humans/agents, not injected into prompt
 ---
 
 Lorebook is installed on this system. It injects context into your prompts based on keyword triggers.
@@ -32,11 +32,7 @@ Commands: `lorebook test "prompt"` to verify matching, `lorebook list` to see al
 
 This entry ships with the installer — when a user first mentions "lorebook", the agent automatically learns what it is and how to create entries.
 
-- `keys` — triggers entry if ANY keyword matches (case-insensitive, `\b` word-boundary)
-- `exclude_keys` — suppresses entry if ANY keyword matches (takes precedence)
-- `priority` — higher = injected first, wins when caps are hit
-- `enabled` — quick toggle without deleting
-- `description` — for humans/agents, not injected
+Also supports `exclude_keys` — suppresses the entry if any exclude keyword matches (takes precedence over keys). Matching is case-insensitive with `\b` word boundaries.
 
 Multiple matches are sorted by priority, capped at 5 entries / 4000 chars (configurable via `lorebook.json`). Project entries override global entries with the same filename.
 
