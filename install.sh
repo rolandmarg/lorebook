@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="OWNER/lorebook"
+REPO="rolandmarg/lorebook"
 INSTALL_DIR="${HOME}/.local/bin"
 CLAUDE_DIR="${HOME}/.claude"
 LOREBOOK_DIR="${CLAUDE_DIR}/lorebook"
@@ -123,7 +123,7 @@ description: Example lorebook entry — enable and customize this, or delete it 
 
 This is an example lorebook entry. When enabled, it injects this content into your prompt whenever you mention "example" or "demo".
 
-Create your own entries as .md files in this directory with YAML frontmatter containing keys, priority, and other fields. See https://github.com/OWNER/lorebook for documentation.
+Create your own entries as .md files in this directory with YAML frontmatter containing keys, priority, and other fields. See https://github.com/rolandmarg/lorebook for documentation.
 EXAMPLE_EOF
     info "Created ${LOREBOOK_DIR}/ with example entry"
   else
