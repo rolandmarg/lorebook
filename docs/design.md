@@ -285,7 +285,8 @@ lorebook/
 
 These are explicitly deferred:
 
-- **Semantic/fuzzy matching** — v1 is keyword-only. Semantic matching is a natural v2 feature.
+- **Semantic matching** — v1 is keyword-only. Semantic matching is a natural v2 feature.
+- **Typo-tolerant matching** — Allow 1 edit distance (Levenshtein) for keywords >= 6 characters. Short keywords (< 6 chars) stay strict to avoid false positives. Multi-keyword entries already provide natural typo resilience — miss one keyword, another probably hits.
 - **Depth/turn injection** — SillyTavern's depth parameter (inject N turns back). Not useful for coding agents.
 - **Regex patterns** — keywords only. Regex can be added later without breaking the format.
 - **Plugin distribution** — Claude Code plugin packaging. CLI + hook is simpler and more portable.
