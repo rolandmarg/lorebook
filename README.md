@@ -21,14 +21,12 @@ Markdown files in `.claude/lorebook/` (project) or `~/.claude/lorebook/` (global
 ---
 keys: [lorebook]  # trigger keywords
 ---
-# ↓ body is injected before your prompt
-#   (does not break prompt cache)
-
-Lorebook injects context into prompts when
-keywords match. Create .md entries with YAML
-frontmatter: keys, exclude_keys, priority,
-enabled. Case-insensitive, word-boundary
-matching. `lorebook test` to verify.
+Body below is injected before your prompt when
+keywords match (does not break prompt cache).
+Create .md entries with YAML frontmatter: keys,
+exclude_keys, priority, enabled. Matching is
+case-insensitive with word boundaries.
+`lorebook test` to verify.
 ```
 
 ## Commands
