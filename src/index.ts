@@ -161,7 +161,8 @@ async function handleList(): Promise<void> {
     for (const e of items) {
       const status = e.enabled ? 'enabled' : 'disabled';
       const keys = e.keys.join(',');
-      console.log(`  ${e.name}.md\tpriority:${e.priority}\tkeys:[${keys}]\t${status}`);
+      const files = e.injectFiles.length > 0 ? `\tfiles:[${e.injectFiles.join(',')}]` : '';
+      console.log(`  ${e.name}.md\tpriority:${e.priority}\tkeys:[${keys}]${files}\t${status}`);
     }
     console.log('');
   }
@@ -257,7 +258,7 @@ Usage: lorebook <command>
 Commands:
   test "<prompt>"   Show which entries match a prompt
   list              List all entries and their status
-  match             Hook mode — reads JSON from stdin, outputs injection (used by Claude Code hook)
+  match             Hook mode — reads JSON from stdin, outputs injection (Claude Code / Codex hook)
   update            Update to the latest release
   help              Show this help
 
@@ -275,6 +276,7 @@ Entry format:
     exclude_keys: [...]     Suppresses if ANY match.
     priority: <number>      Higher = injected first. Default: 0
     enabled: <boolean>      Default: true
+    inject_files: [...]     File paths (relative to project root) to inject.
 
 Config:
   lorebook.json in .claude/lorebook/ or .claude/ (project or global):
