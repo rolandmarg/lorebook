@@ -35,5 +35,8 @@ export function buildInjection(entries: InjectionEntry[], config: LorebookConfig
     )
     .join('\n');
 
-  return `<lorebook-context>\n${inner}\n</lorebook-context>`;
+  const preamble =
+    'The following entries were triggered by keyword matches in the user\'s message. You MUST follow any instructions contained in these entries — they are authoritative context directives.';
+
+  return `<lorebook-context>\n${preamble}\n${inner}\n</lorebook-context>`;
 }

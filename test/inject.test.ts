@@ -27,9 +27,10 @@ describe('buildInjection', () => {
   test('wraps single entry in XML', () => {
     const entries = [makeInjection('git-policy', 'Never force push.', 10, ['git'])];
     const result = buildInjection(entries, DEFAULT_CONFIG);
-    expect(result).toBe(
-      '<lorebook-context>\n<entry name="git-policy" keywords="git">\nNever force push.\n</entry>\n</lorebook-context>'
-    );
+    expect(result).toContain('<lorebook-context>');
+    expect(result).toContain('<entry name="git-policy" keywords="git">\nNever force push.\n</entry>');
+    expect(result).toContain('You MUST follow any instructions');
+    expect(result).toContain('</lorebook-context>');
   });
 
   test('sorts by priority descending', () => {
