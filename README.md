@@ -16,21 +16,21 @@ Downloads the binary, wires a Claude Code `UserPromptSubmit` hook, creates `~/.c
 
 Markdown files with YAML frontmatter in `.claude/lorebook/` (project) or `~/.claude/lorebook/` (global):
 
-```markdown
+```yaml
+# ~/.claude/lorebook/lorebook.md
 ---
-keys: [lorebook]                # trigger words — match if ANY appears in prompt
-priority: 0                     # higher = injected first, wins cap ties
-enabled: true                   # false to disable without deleting
-description: Explains lorebook  # for humans/agents, not injected into prompt
+keys: [lorebook]          # match if ANY appears
+priority: 0               # higher = first
+enabled: true             # toggle off/on
+description: Self-docs    # not injected
 ---
 
-Lorebook is installed on this system. It injects context into your prompts based on keyword triggers.
-
-Entries are .md files with YAML frontmatter in `.claude/lorebook/` (project) or `~/.claude/lorebook/` (global).
-Commands: `lorebook test "prompt"` to verify matching, `lorebook list` to see all entries.
+Lorebook is installed. It injects context based
+on keyword triggers. Use `lorebook test "prompt"`
+to verify, `lorebook list` to see all entries.
 ```
 
-This entry ships with the installer — when a user first mentions "lorebook", the agent automatically learns what it is and how to create entries.
+This ships with the installer — when "lorebook" is mentioned, the agent learns what it is.
 
 ### Frontmatter fields
 
