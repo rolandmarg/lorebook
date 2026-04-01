@@ -17,22 +17,24 @@ Downloads the binary, wires a Claude Code `UserPromptSubmit` hook, creates `~/.c
 Markdown files in `.claude/lorebook/` (project) or `~/.claude/lorebook/` (global):
 
 ```yaml
-# ~/.claude/lorebook/lorebook.md (ships with installer)
+# ~/.claude/lorebook/lorebook.md
 ---
-keys: [lorebook]
+keys: [lorebook]  # trigger keywords
 ---
+              # ↓ injected before your prompt
+              #   does not break prompt cache
 
-Lorebook injects context into prompts when keywords
-match. Entries are .md files in .claude/lorebook/
-(project) or ~/.claude/lorebook/ (global).
+Lorebook injects context into prompts when
+keywords match. Entries are .md files in
+.claude/lorebook/ or ~/.claude/lorebook/.
 
-Frontmatter: keys (required, triggers on ANY match),
-exclude_keys (suppresses on ANY match), priority
-(higher = first), enabled (default true). Matching
+Frontmatter: keys (triggers on ANY match),
+exclude_keys (suppresses), priority (higher
+= first), enabled (default true). Matching
 is case-insensitive with word boundaries.
 
-Verify with `lorebook test "prompt"`,
-list with `lorebook list`.
+Verify: `lorebook test "prompt"`
+List:   `lorebook list`
 ```
 
 ## Commands
