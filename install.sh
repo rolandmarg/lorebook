@@ -116,35 +116,13 @@ SETTINGS_EOF
     cat > "${LOREBOOK_DIR}/lorebook.md" << 'LOREBOOK_EOF'
 ---
 keys: [lorebook]
-priority: 0
-enabled: true
-description: Self-referential entry — explains lorebook to the agent when the user mentions it
 ---
 
-Lorebook is installed on this system. It injects context into your prompts based on keyword triggers.
+Lorebook injects context into prompts when keywords match. Entries are .md files in `.claude/lorebook/` (project) or `~/.claude/lorebook/` (global).
 
-Entries are .md files with YAML frontmatter in `.claude/lorebook/` (project) or `~/.claude/lorebook/` (global):
+Frontmatter: `keys` (required, triggers on ANY match), `exclude_keys` (suppresses on ANY match), `priority` (higher = first), `enabled` (default true). Matching is case-insensitive with word boundaries.
 
-```
----
-keys: [git, commit, push]
-exclude_keys: [github]
-priority: 10
-enabled: true
-description: What this entry is for
----
-
-Content injected when keywords match.
-```
-
-- `keys` — triggers if ANY keyword matches (case-insensitive, word-boundary)
-- `exclude_keys` — suppresses if ANY matches (takes precedence)
-- `priority` — higher = injected first, wins cap ties (default: 0)
-- `enabled` — toggle without deleting (default: true)
-
-Commands: `lorebook test "prompt"` to verify matching, `lorebook list` to see all entries.
-
-Multiple matches sorted by priority, capped at 5 entries / 4000 chars (configurable via lorebook.json).
+Multiple matches are sorted by priority, capped at 5 entries / 4000 chars. Verify with `lorebook test "prompt"`, list with `lorebook list`.
 LOREBOOK_EOF
     info "Created ${LOREBOOK_DIR}/ with example entry"
   else

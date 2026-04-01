@@ -22,9 +22,17 @@ Markdown files in `.claude/lorebook/` (project) or `~/.claude/lorebook/` (global
 keys: [lorebook]
 ---
 
-Lorebook is installed. Create .md entries in
-.claude/lorebook/ with YAML frontmatter keys.
-Use `lorebook test "prompt"` to verify matching.
+Lorebook injects context into prompts when keywords
+match. Entries are .md files in .claude/lorebook/
+(project) or ~/.claude/lorebook/ (global).
+
+Frontmatter: keys (required, triggers on ANY match),
+exclude_keys (suppresses on ANY match), priority
+(higher = first), enabled (default true). Matching
+is case-insensitive with word boundaries.
+
+Verify with `lorebook test "prompt"`,
+list with `lorebook list`.
 ```
 
 ## Commands
