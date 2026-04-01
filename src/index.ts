@@ -1,6 +1,7 @@
 import { matchEntry } from './match';
 import { resolveEntries, loadConfig } from './resolve';
 import { buildInjection, type InjectionEntry } from './inject';
+import type { HookInput, HookOutput } from './hook';
 
 const command = process.argv[2];
 
@@ -45,7 +46,7 @@ async function handleMatch(): Promise<void> {
       chunks.push(Buffer.from(chunk));
     }
     const input = Buffer.concat(chunks).toString('utf-8');
-    const { prompt, cwd } = JSON.parse(input);
+    const { prompt, cwd } = JSON.parse(input) as HookInput;
 
     if (typeof prompt !== 'string' || typeof cwd !== 'string') {
       console.log('{}');
@@ -55,7 +56,13 @@ async function handleMatch(): Promise<void> {
     const { injection } = runMatch(prompt, cwd);
 
     if (injection) {
-      console.log(JSON.stringify({ additionalContext: injection }));
+      const output: HookOutput = {
+        hookSpecificOutput: {
+          hookEventName: 'UserPromptSubmit',
+          additionalContext: injection,
+        },
+      };
+      console.log(JSON.stringify(output));
     } else {
       console.log('{}');
     }
