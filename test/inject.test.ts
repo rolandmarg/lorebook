@@ -10,6 +10,7 @@ function makeEntry(overrides: Partial<LorebookEntry> & { name: string; content: 
     enabled: true,
     description: '',
     source: 'project',
+    filePath: `.claude/lorebook/${overrides.name}.md`,
     ...overrides,
   };
 }
@@ -28,7 +29,7 @@ describe('buildInjection', () => {
     const entries = [makeInjection('git-policy', 'Never force push.', 10, ['git'])];
     const result = buildInjection(entries, DEFAULT_CONFIG);
     expect(result).toContain('<lorebook-context>');
-    expect(result).toContain('<entry name="git-policy" keywords="git">\nNever force push.\n</entry>');
+    expect(result).toContain('<entry name="git-policy" source=".claude/lorebook/git-policy.md" keywords="git">\nNever force push.\n</entry>');
     expect(result).toContain('You MUST follow any instructions');
     expect(result).toContain('</lorebook-context>');
   });
