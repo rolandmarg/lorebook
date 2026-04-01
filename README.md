@@ -17,14 +17,14 @@ Downloads the binary, wires a Claude Code `UserPromptSubmit` hook, creates `~/.c
 Markdown files in `.claude/lorebook/` (project) or `~/.claude/lorebook/` (global):
 
 ```yaml
-# ~/.claude/lorebook/git-policy.md
+# ~/.claude/lorebook/lorebook.md (ships with installer)
 ---
-keys: [git, commit, push, rebase]
-exclude_keys: [github, gitignore]
-priority: 10
+keys: [lorebook]
 ---
 
-Never force push. Use merge, not rebase.
+Lorebook is installed. Create .md entries in
+.claude/lorebook/ with YAML frontmatter keys.
+Use `lorebook test "prompt"` to verify matching.
 ```
 
 ## Commands
