@@ -18,6 +18,9 @@ switch (command) {
   case 'list':
     await handleList();
     break;
+  case 'update':
+    await handleUpdate();
+    break;
   case 'help':
   case '--help':
   case '-h':
@@ -171,6 +174,81 @@ async function handleList(): Promise<void> {
   console.log(`${entries.length} entries (${enabled} enabled, ${disabled} disabled)`);
 }
 
+async function handleUpdate(): Promise<void> {
+  const REPO = 'rolandmarg/lorebook';
+
+  const os = (await import('os')).default;
+  const path = (await import('path')).default;
+  const fs = (await import('fs')).default;
+  const { execFileSync } = await import('child_process');
+
+  const platform = process.platform === 'darwin' ? 'darwin' : 'linux';
+  const arch = process.arch === 'arm64' ? 'arm64' : 'x64';
+  const binaryName = `lorebook-${platform}-${arch}`;
+
+  console.log(`Checking for updates...`);
+
+  let latest: string;
+  try {
+    const res = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`);
+    if (!res.ok) throw new Error(`GitHub API returned ${res.status}`);
+    const data = (await res.json()) as { tag_name: string };
+    latest = data.tag_name;
+  } catch (e) {
+    console.error(`Failed to check for updates: ${e}`);
+    process.exit(1);
+  }
+
+  const latestVersion = latest.replace(/^v/, '');
+  if (latestVersion === VERSION) {
+    console.log(`Already up to date (${VERSION}).`);
+    return;
+  }
+
+  console.log(`Updating ${VERSION} -> ${latestVersion}...`);
+
+  const baseUrl = `https://github.com/${REPO}/releases/download/${latest}`;
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lorebook-update-'));
+  const tmpBinary = path.join(tmpDir, 'lorebook');
+  const tmpSums = path.join(tmpDir, 'SHA256SUMS');
+
+  try {
+    const [binRes, sumRes] = await Promise.all([
+      fetch(`${baseUrl}/${binaryName}`),
+      fetch(`${baseUrl}/SHA256SUMS`),
+    ]);
+
+    if (!binRes.ok) throw new Error(`Failed to download binary: ${binRes.status}`);
+    if (!sumRes.ok) throw new Error(`Failed to download checksums: ${sumRes.status}`);
+
+    fs.writeFileSync(tmpBinary, Buffer.from(await binRes.arrayBuffer()));
+    fs.writeFileSync(tmpSums, await sumRes.text());
+
+    // Verify checksum
+    const sums = fs.readFileSync(tmpSums, 'utf-8');
+    const expectedLine = sums.split('\n').find((l: string) => l.includes(binaryName));
+    if (!expectedLine) throw new Error(`No checksum found for ${binaryName}`);
+    const expected = expectedLine.split(/\s+/)[0];
+
+    const actual = execFileSync('sha256sum', [tmpBinary]).toString().split(/\s+/)[0];
+    if (expected !== actual) throw new Error('Checksum verification failed');
+
+    // Replace binary
+    const installDir = path.join(os.homedir(), '.local', 'bin');
+    fs.mkdirSync(installDir, { recursive: true });
+    const dest = path.join(installDir, 'lorebook');
+    fs.copyFileSync(tmpBinary, dest);
+    fs.chmodSync(dest, 0o755);
+
+    console.log(`Updated to ${latestVersion} (checksum verified).`);
+  } catch (e) {
+    console.error(`Update failed: ${e}`);
+    process.exit(1);
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
 function printHelp(): void {
   console.log(`lorebook ${VERSION} — keyword-triggered context injection for AI coding agents
 
@@ -180,6 +258,7 @@ Commands:
   test "<prompt>"   Show which entries match a prompt
   list              List all entries and their status
   match             Hook mode — reads JSON from stdin, outputs injection (used by Claude Code hook)
+  update            Update to the latest release
   help              Show this help
 
 Options:
