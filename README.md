@@ -44,14 +44,6 @@ lorebook test "your prompt" # dry-run: shows matches and injection preview
 lorebook list               # shows all entries with status
 ```
 
-## Tell your agent about lorebook
-
-After installing, tell your AI agent it can create and manage lorebook entries:
-
-> You have lorebook installed — a keyword-triggered context injection system. You can create `.md` files in `.claude/lorebook/` (project) or `~/.claude/lorebook/` (global) with YAML frontmatter containing `keys`, `exclude_keys`, `priority`, `enabled`, and `description`. The markdown body gets injected into prompts when keywords match. Use `lorebook test "prompt"` to verify entries work and `lorebook list` to see all entries.
-
-Or add it to your CLAUDE.md so every session knows.
-
 ## Manual hook setup
 
 If the installer didn't auto-detect Claude Code:

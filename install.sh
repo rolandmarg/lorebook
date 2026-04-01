@@ -113,18 +113,39 @@ SETTINGS_EOF
 
   if [ ! -d "$LOREBOOK_DIR" ]; then
     mkdir -p "$LOREBOOK_DIR"
-    cat > "${LOREBOOK_DIR}/example.md" << 'EXAMPLE_EOF'
+    cat > "${LOREBOOK_DIR}/lorebook.md" << 'LOREBOOK_EOF'
 ---
-keys: [example, demo]
+keys: [lorebook]
 priority: 0
-enabled: false
-description: Example lorebook entry — enable and customize this, or delete it and create your own
+enabled: true
+description: Self-referential entry — explains lorebook to the agent when the user mentions it
 ---
 
-This is an example lorebook entry. When enabled, it injects this content into your prompt whenever you mention "example" or "demo".
+Lorebook is installed on this system. It injects context into your prompts based on keyword triggers.
 
-Create your own entries as .md files in this directory with YAML frontmatter containing keys, priority, and other fields. See https://github.com/rolandmarg/lorebook for documentation.
-EXAMPLE_EOF
+Entries are .md files with YAML frontmatter in `.claude/lorebook/` (project) or `~/.claude/lorebook/` (global):
+
+```
+---
+keys: [git, commit, push]
+exclude_keys: [github]
+priority: 10
+enabled: true
+description: What this entry is for
+---
+
+Content injected when keywords match.
+```
+
+- `keys` — triggers if ANY keyword matches (case-insensitive, word-boundary)
+- `exclude_keys` — suppresses if ANY matches (takes precedence)
+- `priority` — higher = injected first, wins cap ties (default: 0)
+- `enabled` — toggle without deleting (default: true)
+
+Commands: `lorebook test "prompt"` to verify matching, `lorebook list` to see all entries.
+
+Multiple matches sorted by priority, capped at 5 entries / 4000 chars (configurable via lorebook.json).
+LOREBOOK_EOF
     info "Created ${LOREBOOK_DIR}/ with example entry"
   else
     info "Lorebook directory already exists — skipping"
