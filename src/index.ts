@@ -3,6 +3,8 @@ import { resolveEntries, loadConfig } from './resolve';
 import { buildInjection, type InjectionEntry } from './inject';
 import type { HookInput, HookOutput } from './hook';
 
+const VERSION = '0.2.0';
+
 const command = process.argv[2];
 
 switch (command) {
@@ -15,9 +17,19 @@ switch (command) {
   case 'list':
     await handleList();
     break;
+  case 'help':
+  case '--help':
+  case '-h':
+    printHelp();
+    break;
+  case 'version':
+  case '--version':
+  case '-v':
+    console.log(`lorebook ${VERSION}`);
+    break;
   default:
-    console.error('Usage: lorebook <match|test|list>');
-    process.exit(1);
+    printHelp();
+    process.exit(command ? 1 : 0);
 }
 
 function runMatch(
@@ -148,4 +160,37 @@ async function handleList(): Promise<void> {
   const enabled = entries.filter((e) => e.enabled).length;
   const disabled = entries.length - enabled;
   console.log(`${entries.length} entries (${enabled} enabled, ${disabled} disabled)`);
+}
+
+function printHelp(): void {
+  console.log(`lorebook ${VERSION} — keyword-triggered context injection for AI coding agents
+
+Usage: lorebook <command>
+
+Commands:
+  test "<prompt>"   Show which entries match a prompt
+  list              List all entries and their status
+  match             Hook mode — reads JSON from stdin, outputs injection (used by Claude Code hook)
+  help              Show this help
+
+Options:
+  --help, -h        Show this help
+  --version, -v     Show version
+
+Entry format:
+  Markdown files with YAML frontmatter in:
+    .claude/lorebook/      (project, higher priority)
+    ~/.claude/lorebook/    (global)
+
+  Frontmatter fields:
+    keys: [word, ...]       Required. Triggers on ANY keyword match.
+    exclude_keys: [...]     Suppresses if ANY match.
+    priority: <number>      Higher = injected first. Default: 0
+    enabled: <boolean>      Default: true
+
+Config:
+  lorebook.json in .claude/lorebook/ or .claude/ (project or global):
+    { "maxEntries": 5, "maxChars": 4000 }
+
+https://github.com/rolandmarg/lorebook`);
 }
