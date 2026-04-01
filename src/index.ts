@@ -3,7 +3,7 @@ import { resolveEntries, loadConfig } from './resolve';
 import { buildInjection, type InjectionEntry } from './inject';
 import type { HookInput, HookOutput } from './hook';
 
-const VERSION = '0.2.0';
+const VERSION = '0.2.1';
 
 const command = process.argv[2];
 
