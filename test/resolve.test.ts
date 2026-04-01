@@ -6,7 +6,7 @@ const FIXTURES = join(import.meta.dir, 'fixtures');
 
 describe('parseEntry', () => {
   test('parses all frontmatter fields', () => {
-    const entry = parseEntry(join(FIXTURES, 'git-policy.md'), 'project');
+    const entry = parseEntry(join(FIXTURES, 'git-policy.md'), 'project', '.claude/lorebook/git-policy.md');
     expect(entry.name).toBe('git-policy');
     expect(entry.keys).toEqual(['git', 'commit', 'push', 'rebase']);
     expect(entry.excludeKeys).toEqual(['github', 'gitignore']);
@@ -15,19 +15,21 @@ describe('parseEntry', () => {
     expect(entry.description).toBe('Git policy rules');
     expect(entry.content).toBe('Never force push. Use merge, not rebase.');
     expect(entry.source).toBe('project');
+    expect(entry.filePath).toBe('.claude/lorebook/git-policy.md');
   });
 
   test('applies defaults for optional fields', () => {
-    const entry = parseEntry(join(FIXTURES, 'minimal.md'), 'global');
+    const entry = parseEntry(join(FIXTURES, 'minimal.md'), 'global', '~/.claude/lorebook/minimal.md');
     expect(entry.excludeKeys).toEqual([]);
     expect(entry.priority).toBe(0);
     expect(entry.enabled).toBe(true);
     expect(entry.description).toBe('');
     expect(entry.source).toBe('global');
+    expect(entry.filePath).toBe('~/.claude/lorebook/minimal.md');
   });
 
   test('parses disabled entries', () => {
-    const entry = parseEntry(join(FIXTURES, 'disabled-entry.md'), 'project');
+    const entry = parseEntry(join(FIXTURES, 'disabled-entry.md'), 'project', '.claude/lorebook/disabled-entry.md');
     expect(entry.enabled).toBe(false);
   });
 });

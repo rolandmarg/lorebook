@@ -31,7 +31,7 @@ export function buildInjection(entries: InjectionEntry[], config: LorebookConfig
   const inner = selected
     .map(
       (e) =>
-        `<entry name="${escapeXml(e.entry.name)}" keywords="${escapeXml(e.matchedKeys.join(', '))}">\n${e.entry.content}\n</entry>`
+        `<entry name="${escapeXml(e.entry.name)}" source="${escapeXml(e.entry.filePath)}" keywords="${escapeXml(e.matchedKeys.join(', '))}">\n${e.entry.content}\n</entry>`
     )
     .join('\n');
 

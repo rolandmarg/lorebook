@@ -12,9 +12,10 @@ export interface LorebookEntry {
   description: string;
   content: string;
   source: 'project' | 'global';
+  filePath: string;
 }
 
-export function parseEntry(filePath: string, source: 'project' | 'global'): LorebookEntry {
+export function parseEntry(filePath: string, source: 'project' | 'global', displayPath: string): LorebookEntry {
   const raw = readFileSync(filePath, 'utf-8');
   const { data, content } = matter(raw);
 
@@ -27,22 +28,23 @@ export function parseEntry(filePath: string, source: 'project' | 'global'): Lore
     description: typeof data.description === 'string' ? data.description : '',
     content: content.trim(),
     source,
+    filePath: displayPath,
   };
 }
 
-function loadEntriesFromDir(dir: string, source: 'project' | 'global'): LorebookEntry[] {
+function loadEntriesFromDir(dir: string, source: 'project' | 'global', displayPrefix: string): LorebookEntry[] {
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
     .filter((f) => f.endsWith('.md'))
-    .map((f) => parseEntry(join(dir, f), source));
+    .map((f) => parseEntry(join(dir, f), source, join(displayPrefix, f)));
 }
 
 export function resolveEntries(cwd: string, globalBase?: string): LorebookEntry[] {
   const projectDir = join(cwd, '.claude', 'lorebook');
   const globalDir = join(globalBase ?? homedir(), '.claude', 'lorebook');
 
-  const projectEntries = loadEntriesFromDir(projectDir, 'project');
-  const globalEntries = loadEntriesFromDir(globalDir, 'global');
+  const projectEntries = loadEntriesFromDir(projectDir, 'project', '.claude/lorebook');
+  const globalEntries = loadEntriesFromDir(globalDir, 'global', '~/.claude/lorebook');
 
   const projectNames = new Set(projectEntries.map((e) => e.name));
   return [...projectEntries, ...globalEntries.filter((e) => !projectNames.has(e.name))];

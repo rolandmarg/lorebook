@@ -1,6 +1,7 @@
 import { matchEntry } from './match';
 import { resolveEntries, loadConfig } from './resolve';
 import { buildInjection, type InjectionEntry } from './inject';
+import { logInvocation } from './log';
 import type { HookInput, HookOutput } from './hook';
 
 const VERSION = '0.2.1';
@@ -65,7 +66,15 @@ async function handleMatch(): Promise<void> {
       return;
     }
 
-    const { injection } = runMatch(prompt, cwd);
+    const { matches, injection } = runMatch(prompt, cwd);
+
+    for (const m of matches) {
+      process.stderr.write(`[lorebook] ${m.entry.filePath} (keys: ${m.matchedKeys.join(', ')})\n`);
+    }
+
+    if (matches.length > 0) {
+      logInvocation(prompt, matches);
+    }
 
     if (injection) {
       const output: HookOutput = {
