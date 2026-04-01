@@ -1,7 +1,7 @@
 /**
- * Claude Code hook protocol types.
+ * Hook protocol types for Claude Code and OpenAI Codex CLI.
  *
- * Claude Code validates hook JSON output with a Zod schema that requires
+ * Both tools validate hook JSON output with a schema that requires
  * additionalContext to be nested inside hookSpecificOutput with a matching
  * hookEventName. Outputting {"additionalContext": "..."} at the top level
  * passes validation (hookSpecificOutput is optional) but the context is

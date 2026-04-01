@@ -2,7 +2,7 @@
 
 ## What This Is
 
-lorebook is a keyword-triggered context injection CLI for AI coding agents. It integrates with Claude Code's `UserPromptSubmit` hook to inject relevant lorebook entries based on keyword matches in the user's prompt.
+lorebook is a keyword-triggered context injection CLI for AI coding agents. It integrates with Claude Code and OpenAI Codex CLI via the `UserPromptSubmit` hook to inject relevant lorebook entries based on keyword matches in the user's prompt.
 
 ## Stack
 
