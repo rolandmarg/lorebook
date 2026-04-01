@@ -18,15 +18,19 @@ Markdown files with YAML frontmatter in `.claude/lorebook/` (project) or `~/.cla
 
 ```markdown
 ---
-keys: [git, commit, push, rebase]
-exclude_keys: [github, gitignore]
-priority: 10
+keys: [lorebook]
+priority: 0
 enabled: true
-description: Git policy rules
+description: Self-referential entry — explains lorebook to the agent when the user mentions it
 ---
 
-Never force push. Use merge, not rebase.
+Lorebook is installed on this system. It injects context into your prompts based on keyword triggers.
+
+Entries are .md files with YAML frontmatter in `.claude/lorebook/` (project) or `~/.claude/lorebook/` (global).
+Commands: `lorebook test "prompt"` to verify matching, `lorebook list` to see all entries.
 ```
+
+This entry ships with the installer — when a user first mentions "lorebook", the agent automatically learns what it is and how to create entries.
 
 - `keys` — triggers entry if ANY keyword matches (case-insensitive, `\b` word-boundary)
 - `exclude_keys` — suppresses entry if ANY keyword matches (takes precedence)
