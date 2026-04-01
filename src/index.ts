@@ -4,7 +4,7 @@ import { buildInjection, type InjectionEntry } from './inject';
 import { logInvocation } from './log';
 import type { HookInput, HookOutput } from './hook';
 
-const VERSION = '0.2.1';
+const VERSION = '0.3.0';
 
 const command = process.argv[2];
 
