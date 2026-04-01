@@ -102,6 +102,51 @@ describe('resolveEntries', () => {
   });
 });
 
+describe('inject_files resolution', () => {
+  function setupProject(entries: Record<string, string>, files: Record<string, string> = {}): string {
+    const tmp = mkdtempSync(join(tmpdir(), 'lorebook-test-'));
+    const dir = join(tmp, '.claude', 'lorebook');
+    mkdirSync(dir, { recursive: true });
+    for (const [name, content] of Object.entries(entries)) {
+      writeFileSync(join(dir, name), content);
+    }
+    for (const [name, content] of Object.entries(files)) {
+      writeFileSync(join(tmp, name), content);
+    }
+    return tmp;
+  }
+
+  test('appends file content to entry', () => {
+    const cwd = setupProject(
+      { 'design.md': '---\nkeys: [design]\ninject_files: [PHILOSOPHY.md]\n---\nPreamble.' },
+      { 'PHILOSOPHY.md': 'Be minimal.' }
+    );
+    const entries = resolveEntries(cwd, cwd);
+    expect(entries[0]!.content).toBe('Preamble.\n\nBe minimal.');
+    rmSync(cwd, { recursive: true, force: true });
+  });
+
+  test('empty body with inject_files uses only file content', () => {
+    const cwd = setupProject(
+      { 'design.md': '---\nkeys: [design]\ninject_files: [PHILOSOPHY.md]\n---' },
+      { 'PHILOSOPHY.md': 'Be minimal.' }
+    );
+    const entries = resolveEntries(cwd, cwd);
+    expect(entries[0]!.content).toBe('Be minimal.');
+    rmSync(cwd, { recursive: true, force: true });
+  });
+
+  test('multiple inject_files are appended in order', () => {
+    const cwd = setupProject(
+      { 'design.md': '---\nkeys: [design]\ninject_files: [A.md, B.md]\n---' },
+      { 'A.md': 'File A.', 'B.md': 'File B.' }
+    );
+    const entries = resolveEntries(cwd, cwd);
+    expect(entries[0]!.content).toBe('File A.\n\nFile B.');
+    rmSync(cwd, { recursive: true, force: true });
+  });
+});
+
 import { loadConfig } from '../src/resolve';
 
 describe('loadConfig', () => {

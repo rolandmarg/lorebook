@@ -34,6 +34,24 @@ export function parseEntry(filePath: string, source: 'project' | 'global', displ
   };
 }
 
+export function resolveFileContent(entry: LorebookEntry, cwd: string): void {
+  if (entry.injectFiles.length === 0) return;
+
+  const parts: string[] = [];
+  if (entry.content) parts.push(entry.content);
+
+  for (const filePath of entry.injectFiles) {
+    const resolved = join(cwd, filePath);
+    if (existsSync(resolved)) {
+      parts.push(readFileSync(resolved, 'utf-8').trim());
+    } else {
+      process.stderr.write(`[lorebook] warning: file not found: ${filePath}\n`);
+    }
+  }
+
+  entry.content = parts.join('\n\n');
+}
+
 function loadEntriesFromDir(dir: string, source: 'project' | 'global', displayPrefix: string): LorebookEntry[] {
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
@@ -49,7 +67,13 @@ export function resolveEntries(cwd: string, globalBase?: string): LorebookEntry[
   const globalEntries = loadEntriesFromDir(globalDir, 'global', '~/.claude/lorebook');
 
   const projectNames = new Set(projectEntries.map((e) => e.name));
-  return [...projectEntries, ...globalEntries.filter((e) => !projectNames.has(e.name))];
+  const entries = [...projectEntries, ...globalEntries.filter((e) => !projectNames.has(e.name))];
+
+  for (const entry of entries) {
+    resolveFileContent(entry, cwd);
+  }
+
+  return entries;
 }
 
 export interface LorebookConfig {
