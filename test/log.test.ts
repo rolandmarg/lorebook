@@ -16,6 +16,7 @@ function makeMatch(name: string, filePath: string, matchedKeys: string[]): Injec
       enabled: true,
       description: '',
       content: 'test content',
+      injectFiles: [],
       source: 'project',
       filePath,
     } satisfies LorebookEntry,

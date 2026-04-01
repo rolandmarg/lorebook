@@ -32,6 +32,16 @@ describe('parseEntry', () => {
     const entry = parseEntry(join(FIXTURES, 'disabled-entry.md'), 'project', '.claude/lorebook/disabled-entry.md');
     expect(entry.enabled).toBe(false);
   });
+
+  test('parses inject_files from frontmatter', () => {
+    const entry = parseEntry(join(FIXTURES, 'with-inject-files.md'), 'project', '.claude/lorebook/with-inject-files.md');
+    expect(entry.injectFiles).toEqual(['PHILOSOPHY.md', 'IDEAS.md']);
+  });
+
+  test('defaults injectFiles to empty array', () => {
+    const entry = parseEntry(join(FIXTURES, 'minimal.md'), 'global', '~/.claude/lorebook/minimal.md');
+    expect(entry.injectFiles).toEqual([]);
+  });
 });
 
 import { resolveEntries } from '../src/resolve';

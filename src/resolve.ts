@@ -11,6 +11,7 @@ export interface LorebookEntry {
   enabled: boolean;
   description: string;
   content: string;
+  injectFiles: string[];
   source: 'project' | 'global';
   filePath: string;
 }
@@ -27,6 +28,7 @@ export function parseEntry(filePath: string, source: 'project' | 'global', displ
     enabled: typeof data.enabled === 'boolean' ? data.enabled : true,
     description: typeof data.description === 'string' ? data.description : '',
     content: content.trim(),
+    injectFiles: Array.isArray(data.inject_files) ? data.inject_files.map(String) : [],
     source,
     filePath: displayPath,
   };

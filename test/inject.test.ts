@@ -9,6 +9,7 @@ function makeEntry(overrides: Partial<LorebookEntry> & { name: string; content: 
     priority: 0,
     enabled: true,
     description: '',
+    injectFiles: [],
     source: 'project',
     filePath: `.claude/lorebook/${overrides.name}.md`,
     ...overrides,
