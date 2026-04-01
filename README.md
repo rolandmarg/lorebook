@@ -1,8 +1,8 @@
 # lorebook
 
-Keyword-triggered context injection for AI coding agents. Like [SillyTavern's world-info](https://docs.sillytavern.app/usage/core-concepts/worldinfo/), but for coding agents.
+Keyword-triggered context injection for AI coding agents. inspired by [SillyTavern's world-info](https://docs.sillytavern.app/usage/core-concepts/worldinfo/)
 
-CLAUDE.md files grow large, but most instructions are irrelevant to any given prompt. Lorebook injects only matching entries via `additionalContext` — the system prompt stays cached.
+CLAUDE.md files grow large, but most instructions are irrelevant to any given prompt. Lorebook injects only matching entries via XML tags before user prompt. It does not break prompt cache!
 
 ## Install
 
