@@ -138,7 +138,7 @@ Lorebook injects context into prompts when keywords match. Entries are .md files
 
 Frontmatter: `keys` (required, triggers on ANY match), `exclude_keys` (suppresses on ANY match), `priority` (higher = first), `enabled` (default true). Matching is case-insensitive with word boundaries.
 
-Multiple matches are sorted by priority, capped at 5 entries / 4000 chars. Verify with `lorebook test "prompt"`, list with `lorebook list`.
+Multiple matches are sorted by priority, capped at 5 entries / 4000 chars. Verify with `lorebook test "prompt"`, list with `lorebook list`. https://github.com/rolandmarg/lorebook
 LOREBOOK_EOF
     info "Created ${LOREBOOK_DIR}/ with example entry"
   else

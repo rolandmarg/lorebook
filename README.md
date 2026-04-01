@@ -27,6 +27,7 @@ Create .md entries with YAML frontmatter: keys,
 exclude_keys, priority, enabled. Matching is
 case-insensitive with word boundaries.
 `lorebook test` to verify.
+https://github.com/rolandmarg/lorebook
 ```
 
 ## Commands
