@@ -5,6 +5,10 @@ export interface InjectionEntry {
   matchedKeys: string[];
 }
 
+function escapeXml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 export function buildInjection(entries: InjectionEntry[], config: LorebookConfig): string {
   const sorted = [...entries].sort((a, b) => {
     if (b.entry.priority !== a.entry.priority) return b.entry.priority - a.entry.priority;
@@ -27,7 +31,7 @@ export function buildInjection(entries: InjectionEntry[], config: LorebookConfig
   const inner = selected
     .map(
       (e) =>
-        `<entry name="${e.entry.name}" keywords="${e.matchedKeys.join(', ')}">\n${e.entry.content}\n</entry>`
+        `<entry name="${escapeXml(e.entry.name)}" keywords="${escapeXml(e.matchedKeys.join(', '))}">\n${e.entry.content}\n</entry>`
     )
     .join('\n');
 

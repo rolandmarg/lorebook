@@ -104,4 +104,17 @@ describe('buildInjection', () => {
     const result = buildInjection(entries, DEFAULT_CONFIG);
     expect(result).toContain('keywords="git, push"');
   });
+
+  test('escapes XML special chars in name attribute', () => {
+    const entries = [makeInjection('foo"bar', 'Content.', 1, ['x'])];
+    const result = buildInjection(entries, DEFAULT_CONFIG);
+    expect(result).toContain('name="foo&quot;bar"');
+    expect(result).not.toContain('name="foo"bar"');
+  });
+
+  test('escapes XML special chars in keywords attribute', () => {
+    const entries = [makeInjection('test', 'Content.', 1, ['a<b', 'c&d'])];
+    const result = buildInjection(entries, DEFAULT_CONFIG);
+    expect(result).toContain('keywords="a&lt;b, c&amp;d"');
+  });
 });

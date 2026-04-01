@@ -43,14 +43,27 @@ if [ -z "$LATEST" ]; then
   error "Could not determine latest release"
 fi
 
-DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${LATEST}/${BINARY}"
+BASE_URL="https://github.com/${REPO}/releases/download/${LATEST}"
 info "Downloading lorebook ${LATEST}..."
 
 mkdir -p "$INSTALL_DIR"
-curl -fsSL "$DOWNLOAD_URL" -o "${INSTALL_DIR}/lorebook"
-chmod +x "${INSTALL_DIR}/lorebook"
+TEMP_DIR=$(mktemp -d)
+curl -fsSL "${BASE_URL}/${BINARY}" -o "${TEMP_DIR}/lorebook"
+curl -fsSL "${BASE_URL}/SHA256SUMS" -o "${TEMP_DIR}/SHA256SUMS"
 
-info "Installed to ${INSTALL_DIR}/lorebook"
+# Verify checksum
+EXPECTED=$(grep "${BINARY}" "${TEMP_DIR}/SHA256SUMS" | awk '{print $1}')
+ACTUAL=$(sha256sum "${TEMP_DIR}/lorebook" | awk '{print $1}')
+if [ "$EXPECTED" != "$ACTUAL" ]; then
+  rm -rf "$TEMP_DIR"
+  error "Checksum verification failed — download may be corrupted or tampered with"
+fi
+
+mv "${TEMP_DIR}/lorebook" "${INSTALL_DIR}/lorebook"
+chmod +x "${INSTALL_DIR}/lorebook"
+rm -rf "$TEMP_DIR"
+
+info "Installed to ${INSTALL_DIR}/lorebook (checksum verified)"
 
 # Check PATH
 if ! echo "$PATH" | tr ':' '\n' | grep -q "^${INSTALL_DIR}$"; then
@@ -73,17 +86,20 @@ if [ -d "$CLAUDE_DIR" ]; then
     else
       TEMP=$(mktemp)
       if command -v python3 &>/dev/null; then
-        python3 -c "
-import json, sys
-with open('${SETTINGS_FILE}') as f:
+        SETTINGS_PATH="$SETTINGS_FILE" TEMP_OUT="$TEMP" HOOK_JSON="$HOOK_GROUP" python3 << 'PYEOF'
+import json, os
+settings_path = os.environ['SETTINGS_PATH']
+temp_out = os.environ['TEMP_OUT']
+hook_json = os.environ['HOOK_JSON']
+with open(settings_path) as f:
     settings = json.load(f)
 hooks = settings.setdefault('hooks', {})
 ups = hooks.setdefault('UserPromptSubmit', [])
-ups.append(json.loads('${HOOK_GROUP}'))
-with open('${TEMP}', 'w') as f:
+ups.append(json.loads(hook_json))
+with open(temp_out, 'w') as f:
     json.dump(settings, f, indent=2)
     f.write('\n')
-"
+PYEOF
         mv "$TEMP" "$SETTINGS_FILE"
         info "Added UserPromptSubmit hook to ${SETTINGS_FILE}"
       else
