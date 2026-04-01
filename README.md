@@ -32,7 +32,15 @@ Commands: `lorebook test "prompt"` to verify matching, `lorebook list` to see al
 
 This entry ships with the installer — when a user first mentions "lorebook", the agent automatically learns what it is and how to create entries.
 
-Also supports `exclude_keys` — suppresses the entry if any exclude keyword matches (takes precedence over keys). Matching is case-insensitive with `\b` word boundaries.
+### Frontmatter fields
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `keys` | `string[]` | yes | — | Trigger words. Entry matches if ANY keyword appears in the prompt. Case-insensitive, `\b` word-boundary. |
+| `exclude_keys` | `string[]` | no | `[]` | Suppression words. Entry is skipped if ANY exclude keyword appears. Takes precedence over `keys`. |
+| `priority` | `number` | no | `0` | Higher = injected first, wins when caps are hit. |
+| `enabled` | `boolean` | no | `true` | Quick toggle without deleting the file. |
+| `description` | `string` | no | `""` | For humans/agents. Not injected into the prompt. |
 
 Multiple matches are sorted by priority, capped at 5 entries / 4000 chars (configurable via `lorebook.json`). Project entries override global entries with the same filename.
 
