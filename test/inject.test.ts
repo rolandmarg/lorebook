@@ -29,10 +29,10 @@ describe('buildInjection', () => {
   test('wraps single entry in XML', () => {
     const entries = [makeInjection('git-policy', 'Never force push.', 10, ['git'])];
     const result = buildInjection(entries, DEFAULT_CONFIG);
-    expect(result).toContain('<lorebook-context>');
-    expect(result).toContain('<entry name="git-policy" source=".claude/lorebook/git-policy.md" keywords="git">\nNever force push.\n</entry>');
-    expect(result).toContain('You MUST follow any instructions');
-    expect(result).toContain('</lorebook-context>');
+    expect(result.xml).toContain('<lorebook-context>');
+    expect(result.xml).toContain('<entry name="git-policy" source=".claude/lorebook/git-policy.md" keywords="git">\nNever force push.\n</entry>');
+    expect(result.xml).toContain('You MUST follow any instructions');
+    expect(result.xml).toContain('</lorebook-context>');
   });
 
   test('sorts by priority descending', () => {
@@ -42,7 +42,7 @@ describe('buildInjection', () => {
       makeInjection('mid', 'Mid priority.', 5, ['mid']),
     ];
     const result = buildInjection(entries, DEFAULT_CONFIG);
-    const names = [...result.matchAll(/name="([^"]+)"/g)].map((m) => m[1]);
+    const names = [...result.xml.matchAll(/name="([^"]+)"/g)].map((m) => m[1]);
     expect(names).toEqual(['high', 'mid', 'low']);
   });
 
@@ -52,7 +52,7 @@ describe('buildInjection', () => {
       makeInjection('alpha', 'A content.', 5, ['a']),
     ];
     const result = buildInjection(entries, DEFAULT_CONFIG);
-    const names = [...result.matchAll(/name="([^"]+)"/g)].map((m) => m[1]);
+    const names = [...result.xml.matchAll(/name="([^"]+)"/g)].map((m) => m[1]);
     expect(names).toEqual(['alpha', 'zebra']);
   });
 
@@ -64,8 +64,10 @@ describe('buildInjection', () => {
       makeInjection('c', 'C.', 1, ['c']),
     ];
     const result = buildInjection(entries, config);
-    const names = [...result.matchAll(/name="([^"]+)"/g)].map((m) => m[1]);
+    const names = [...result.xml.matchAll(/name="([^"]+)"/g)].map((m) => m[1]);
     expect(names).toEqual(['a', 'b']);
+    expect(result.selected.map((e) => e.entry.name)).toEqual(['a', 'b']);
+    expect(result.dropped.map((e) => e.entry.name)).toEqual(['c']);
   });
 
   test('respects character cap — skips entries that exceed, does not truncate', () => {
@@ -76,15 +78,16 @@ describe('buildInjection', () => {
       makeInjection('also-short', 'Yo.', 8, ['a']),      // 3 chars — fits
     ];
     const result = buildInjection(entries, config);
-    const names = [...result.matchAll(/name="([^"]+)"/g)].map((m) => m[1]);
+    const names = [...result.xml.matchAll(/name="([^"]+)"/g)].map((m) => m[1]);
     expect(names).toEqual(['short', 'also-short']);
+    expect(result.dropped.map((e) => e.entry.name)).toEqual(['long']);
   });
 
   test('character cap measures body only, not XML overhead', () => {
     const config: LorebookConfig = { maxEntries: 99, maxChars: 10 };
     const entries = [makeInjection('x', 'A'.repeat(10), 1, ['x'])];
     const result = buildInjection(entries, config);
-    expect(result).toContain('name="x"'); // 10 chars exactly = fits
+    expect(result.xml).toContain('name="x"'); // 10 chars exactly = fits
   });
 
   test('both caps — whichever hits first', () => {
@@ -94,30 +97,34 @@ describe('buildInjection', () => {
       makeInjection('b', 'B.', 1, ['b']),
     ];
     const result = buildInjection(entries, config);
-    const names = [...result.matchAll(/name="([^"]+)"/g)].map((m) => m[1]);
+    const names = [...result.xml.matchAll(/name="([^"]+)"/g)].map((m) => m[1]);
     expect(names).toEqual(['a']); // entry cap = 1
+    expect(result.dropped.map((e) => e.entry.name)).toEqual(['b']);
   });
 
-  test('returns empty string when no entries', () => {
-    expect(buildInjection([], DEFAULT_CONFIG)).toBe('');
+  test('returns empty xml when no entries', () => {
+    const result = buildInjection([], DEFAULT_CONFIG);
+    expect(result.xml).toBe('');
+    expect(result.selected).toEqual([]);
+    expect(result.dropped).toEqual([]);
   });
 
   test('includes matched keywords in attributes', () => {
     const entries = [makeInjection('test', 'Content.', 1, ['git', 'push'])];
     const result = buildInjection(entries, DEFAULT_CONFIG);
-    expect(result).toContain('keywords="git, push"');
+    expect(result.xml).toContain('keywords="git, push"');
   });
 
   test('escapes XML special chars in name attribute', () => {
     const entries = [makeInjection('foo"bar', 'Content.', 1, ['x'])];
     const result = buildInjection(entries, DEFAULT_CONFIG);
-    expect(result).toContain('name="foo&quot;bar"');
-    expect(result).not.toContain('name="foo"bar"');
+    expect(result.xml).toContain('name="foo&quot;bar"');
+    expect(result.xml).not.toContain('name="foo"bar"');
   });
 
   test('escapes XML special chars in keywords attribute', () => {
     const entries = [makeInjection('test', 'Content.', 1, ['a<b', 'c&d'])];
     const result = buildInjection(entries, DEFAULT_CONFIG);
-    expect(result).toContain('keywords="a&lt;b, c&amp;d"');
+    expect(result.xml).toContain('keywords="a&lt;b, c&amp;d"');
   });
 });

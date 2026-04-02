@@ -1,10 +1,10 @@
 import { matchEntry } from './match';
 import { resolveEntries, loadConfig } from './resolve';
-import { buildInjection, type InjectionEntry } from './inject';
+import { buildInjection, type InjectionEntry, type InjectionResult } from './inject';
 import { logInvocation } from './log';
 import type { HookInput, HookOutput } from './hook';
 
-const VERSION = '0.3.0';
+const VERSION = '0.4.0';
 
 const command = process.argv[2];
 
@@ -39,7 +39,7 @@ switch (command) {
 function runMatch(
   prompt: string,
   cwd: string
-): { matches: InjectionEntry[]; injection: string; totalEntries: number } {
+): { matches: InjectionEntry[]; result: InjectionResult; totalEntries: number } {
   const entries = resolveEntries(cwd);
   const config = loadConfig(cwd);
 
@@ -51,8 +51,8 @@ function runMatch(
     }
   }
 
-  const injection = buildInjection(matches, config);
-  return { matches, injection, totalEntries: entries.length };
+  const result = buildInjection(matches, config);
+  return { matches, result, totalEntries: entries.length };
 }
 
 async function handleMatch(): Promise<void> {
@@ -69,7 +69,7 @@ async function handleMatch(): Promise<void> {
       return;
     }
 
-    const { matches, injection } = runMatch(prompt, cwd);
+    const { matches, result } = runMatch(prompt, cwd);
 
     for (const m of matches) {
       process.stderr.write(`[lorebook] ${m.entry.filePath} (keys: ${m.matchedKeys.join(', ')})\n`);
@@ -79,11 +79,22 @@ async function handleMatch(): Promise<void> {
       logInvocation(prompt, matches);
     }
 
-    if (injection) {
+    if (result.xml) {
+      const lines = result.selected.map(
+        (e) => `<entry name="${e.entry.name}" source="${e.entry.filePath}" keywords="${e.matchedKeys.join(', ')}">`
+      );
+      if (result.dropped.length > 0) {
+        for (const e of result.dropped) {
+          lines.push(`<entry name="${e.entry.name}" source="${e.entry.filePath}" keywords="${e.matchedKeys.join(', ')}"> [DROPPED]`);
+        }
+      }
+      const msg = lines.join('\n');
+
       const output: HookOutput = {
+        systemMessage: msg,
         hookSpecificOutput: {
           hookEventName: 'UserPromptSubmit',
-          additionalContext: injection,
+          additionalContext: result.xml,
         },
       };
       console.log(JSON.stringify(output));
@@ -114,7 +125,7 @@ async function handleTest(prompt?: string): Promise<void> {
     }
   }
 
-  const injection = buildInjection(matches, config);
+  const result = buildInjection(matches, config);
 
   if (matches.length === 0) {
     console.log(`No matches out of ${entries.length} entries.`);
@@ -130,16 +141,21 @@ async function handleTest(prompt?: string): Promise<void> {
   });
 
   for (const m of sorted) {
-    console.log(`  ${m.entry.name} (priority: ${m.entry.priority})`);
+    const status = result.dropped.includes(m) ? ' [DROPPED]' : '';
+    console.log(`  ${m.entry.name} (priority: ${m.entry.priority})${status}`);
     console.log(`    matched: ${m.matchedKeys.join(', ')}`);
     console.log(`    excluded: \u2014`);
     console.log('');
   }
 
-  const charCount = matches.reduce((sum, m) => sum + m.entry.content.length, 0);
-  console.log(`Injection preview (${charCount} chars, ${matches.length}/${config.maxEntries} entries):`);
+  if (result.dropped.length > 0) {
+    console.log(`\u26a0 ${result.dropped.length} entry(s) dropped (over ${config.maxChars} char / ${config.maxEntries} entry budget)\n`);
+  }
+
+  const charCount = result.selected.reduce((sum, m) => sum + m.entry.content.length, 0);
+  console.log(`Injection preview (${charCount} chars, ${result.selected.length}/${config.maxEntries} entries):`);
   console.log('\u2500'.repeat(42));
-  console.log(injection);
+  console.log(result.xml);
 }
 
 async function handleList(): Promise<void> {

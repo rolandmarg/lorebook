@@ -20,6 +20,7 @@ export interface HookInput {
 
 /** Valid JSON response for a UserPromptSubmit hook. */
 export interface HookOutput {
+  systemMessage?: string;
   hookSpecificOutput: {
     hookEventName: 'UserPromptSubmit';
     additionalContext: string;
