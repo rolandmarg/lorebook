@@ -4,7 +4,7 @@ import { buildInjection, type InjectionEntry, type InjectionResult } from './inj
 import { logInvocation } from './log';
 import type { HookInput, HookOutput } from './hook';
 
-const VERSION = '0.4.1';
+const VERSION = '0.4.2';
 
 const command = process.argv[2];
 
@@ -81,14 +81,12 @@ async function handleMatch(): Promise<void> {
 
     if (result.xml) {
       const lines = result.selected.map(
-        (e) => `<entry name="${e.entry.name}" source="${e.entry.filePath}" keywords="${e.matchedKeys.join(', ')}">`
+        (e) => `<lorebook injecting ${e.entry.filePath} [trigger="${e.matchedKeys.join(', ')}"]>`
       );
-      if (result.dropped.length > 0) {
-        for (const e of result.dropped) {
-          lines.push(`<entry name="${e.entry.name}" source="${e.entry.filePath}" keywords="${e.matchedKeys.join(', ')}"> [DROPPED]`);
-        }
+      for (const e of result.dropped) {
+        lines.push(`<lorebook dropped ${e.entry.filePath} [trigger="${e.matchedKeys.join(', ')}"]>`);
       }
-      const msg = lines.join('\n');
+      const msg = '\n' + lines.join('\n');
 
       const output: HookOutput = {
         systemMessage: msg,
