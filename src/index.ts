@@ -4,7 +4,7 @@ import { buildInjection, type InjectionEntry, type InjectionResult } from './inj
 import { logInvocation } from './log';
 import type { HookInput, HookOutput } from './hook';
 
-const VERSION = '0.4.0';
+const VERSION = '0.4.1';
 
 const command = process.argv[2];
 
@@ -250,12 +250,14 @@ async function handleUpdate(): Promise<void> {
     const actual = execFileSync('sha256sum', [tmpBinary]).toString().split(/\s+/)[0];
     if (expected !== actual) throw new Error('Checksum verification failed');
 
-    // Replace binary
+    // Replace binary — rename instead of copyFile to avoid ETXTBSY on running binary
     const installDir = path.join(os.homedir(), '.local', 'bin');
     fs.mkdirSync(installDir, { recursive: true });
     const dest = path.join(installDir, 'lorebook');
-    fs.copyFileSync(tmpBinary, dest);
-    fs.chmodSync(dest, 0o755);
+    const staging = `${dest}.new`;
+    fs.copyFileSync(tmpBinary, staging);
+    fs.chmodSync(staging, 0o755);
+    fs.renameSync(staging, dest);
 
     console.log(`Updated to ${latestVersion} (checksum verified).`);
   } catch (e) {
